@@ -13,4 +13,9 @@
         <item name="android:textColor">#fefafa</item>
         <item name="android:textSize">16sp</item>
     </style>
+    <style name="SplashTheme" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen_icon</item>
+        <item name="windowSplashScreenBackground">#000000</item>
+        <item name="postSplashScreenTheme">@style/Theme.ToDoList</item>
+    </style>
 </resources>
