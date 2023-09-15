@@ -1,5 +1,6 @@
 package com.example.todolist
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,13 +61,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -74,21 +80,26 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyDay(navController: NavHostController, database: AppDatabase) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
+    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val calendar = Calendar.getInstance()
-    val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
     val formattedDate = dateFormat.format(calendar.time)
+    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.complition_sound) }
+
+    var containerColor by remember { mutableStateOf(Color(0xFFEE9E8B)) }
+
+    val scope = rememberCoroutineScope()
+
+    val focusRequester = remember { FocusRequester() }
+
     val sheetStateInput = rememberModalBottomSheetState()
     val sheetStateBackground = rememberModalBottomSheetState()
-    var containerColor by remember { mutableStateOf(Color(0xFFEE9E8B)) }
-    val scope = rememberCoroutineScope()
-    val focusRequester = remember { FocusRequester() }
     var showBottomSheetInput by remember { mutableStateOf(false) }
     var showBottomSheetBackground by remember { mutableStateOf(false) }
+
     var textValue by remember { mutableStateOf("") }
-    val users by database.userDao().getAll().collectAsState(emptyList())
+    val myDayData by database.MyDayDao().getAll().collectAsState(emptyList())
     var selectedBackgroundImage by remember { mutableIntStateOf(R.drawable.background) }
 
     when (selectedBackgroundImage) {
@@ -127,7 +138,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
             onDismissRequest = { showBottomSheetInput = false },
             windowInsets = WindowInsets(bottom = 0.dp),
             sheetState = sheetStateInput,
-            containerColor = Color(0xFF212121),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
         ) {
             Row(
@@ -137,19 +148,23 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                    Checkbox(checked = false, onCheckedChange = {})
+                    Checkbox(checked = false, onCheckedChange = {}, enabled = false)
                 }
                 TextField(
-                    textStyle = TextStyle(color = Color.White),
+                    textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
                     colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = Color(0xFF212121),
-                        focusedContainerColor = Color(0xFF212121),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = Color.White
-
+                        cursorColor = MaterialTheme.colorScheme.secondary,
                     ),
-                    placeholder = { Text(color = Color.White, text = "Enter your text") },
+                    placeholder = {
+                        Text(
+                            color = MaterialTheme.colorScheme.secondary,
+                            text = stringResource(id = R.string.enter_your_text)
+                        )
+                    },
                     maxLines = 1,
                     value = textValue,
                     modifier = Modifier
@@ -160,8 +175,8 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     onClick = {
                         if (textValue.isNotBlank()) {
                             scope.launch {
-                                database.userDao()
-                                    .insertAll(User(isChecked = false, todo = textValue))
+                                database.MyDayDao()
+                                    .insertAll(MyDayEntity(todo = textValue))
                                 textValue = ""
                             }
                         }
@@ -188,14 +203,14 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
             onDismissRequest = { showBottomSheetBackground = false },
             windowInsets = WindowInsets(bottom = 0.dp),
             sheetState = sheetStateBackground,
-            containerColor = Color(0xFF212121),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
         ) {
             Column(modifier = Modifier.navigationBarsPadding()) {
                 Text(
-                    text = "Pick a background",
+                    text = stringResource(id = R.string.pick_background),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFDDDDDD),
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 10.dp)
                 )
@@ -223,7 +238,10 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
         }
     }
     AsyncImage(
-        model = selectedBackgroundImage,
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(selectedBackgroundImage)
+            .crossfade(true)
+            .build(),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
@@ -245,7 +263,11 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                 )
             }
             Column {
-                Text(text = "My Day", color = Color(0xFFfefafa), fontSize = 22.sp)
+                Text(
+                    text = stringResource(id = R.string.my_day),
+                    color = Color(0xFFfefafa),
+                    fontSize = 22.sp
+                )
                 Text(text = formattedDate, color = Color(0xFFfefafa), fontSize = 16.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -256,11 +278,16 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     tint = Color(0xFFfefafa)
                 )
                 DropdownMenu(
-                    modifier = Modifier.background(Color(0xFF303030)),
+                    modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
                     expanded = expanded,
                     onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
-                        text = { Text(text = "Change Background", color = Color.White) },
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.change_background),
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        },
                         onClick = {
                             showBottomSheetBackground = true
                             expanded = false
@@ -268,7 +295,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                         leadingIcon = {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_photo_24),
-                                contentDescription = null, tint = Color.White
+                                contentDescription = null,
                             )
                         })
                 }
@@ -280,33 +307,160 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     .fillMaxWidth()
 
             ) {
-                items(users) { user ->
-                    val isCheckedState = remember { mutableStateOf(user.isChecked) }
+                items(myDayData) { dayInfo ->
+                    val isCheckedState = remember { mutableStateOf(dayInfo.isChecked) }
+                    val sheetStateEdit = rememberModalBottomSheetState()
+                    var showBottomSheetEdit by remember { mutableStateOf(false) }
+                    var textValueEdit by remember { mutableStateOf(dayInfo.todo) }
+                    var expandedEdit by remember { mutableStateOf(false) }
+                    if (showBottomSheetEdit) {
+                        LaunchedEffect(Unit) {
+                            focusRequester.requestFocus()
+                        }
+                        ModalBottomSheet(
+                            onDismissRequest = { showBottomSheetEdit = false },
+                            windowInsets = WindowInsets(bottom = 0.dp),
+                            sheetState = sheetStateEdit,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .navigationBarsPadding()
+                                    .padding(
+                                        start = 12.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp,
+                                        end = 12.dp
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                                    Checkbox(checked = false, onCheckedChange = {})
+                                }
+                                TextField(
+                                    textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                                    colors = TextFieldDefaults.colors(
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        cursorColor = MaterialTheme.colorScheme.secondary,
+                                    ),
+                                    placeholder = {
+                                        Text(
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            text = stringResource(id = R.string.enter_your_text)
+                                        )
+                                    },
+                                    maxLines = 1,
+                                    value = textValueEdit,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .focusRequester(focusRequester),
+                                    onValueChange = { newText -> textValueEdit = newText })
+                                Button(
+                                    onClick = {
+                                        if (textValueEdit.isNotBlank()) {
+                                            scope.launch {
+                                                val editedDayInfo = dayInfo.copy(todo = textValueEdit)
+                                                database.MyDayDao().updateItem(editedDayInfo)
+                                                textValueEdit = ""
+                                                showBottomSheetEdit = false
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    contentPadding = PaddingValues(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF777779
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_arrow_upward_24),
+                                        contentDescription = null,
+                                        tint = Color(0xFF212121)
+                                    )
+
+                                }
+                            }
+                        }
+                    }
                     Card(
                         Modifier
                             .fillMaxWidth()
-                            .padding(top = 3.dp),
+                            .padding(top = 3.dp)
+                            .clickable { expandedEdit = true },
                         colors = CardDefaults.cardColors(Color(0xFF212121))
                     ) {
+                        DropdownMenu(
+                            modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
+                            expanded = expandedEdit,
+                            onDismissRequest = { expandedEdit = false }) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.edit),
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_edit_24),
+                                        contentDescription = null
+                                    )
+                                },
+                                onClick = {
+                                    showBottomSheetEdit = true
+                                    expandedEdit = false
+                                })
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.delete),
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_delete_24),
+                                        contentDescription = null
+                                    )
+                                },
+                                onClick = {
+                                    scope.launch {
+                                        database.MyDayDao().delete(dayInfo)
+                                    }
+                                    expandedEdit = false
+                                })
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = user.isChecked,
+                                checked = dayInfo.isChecked,
                                 onCheckedChange = {
-                                    scope.launch{
+                                    scope.launch {
                                         if (!isCheckedState.value) {
                                             isCheckedState.value = true
+                                            mediaPlayer.start()
                                         } else if (isCheckedState.value) {
                                             isCheckedState.value = false
                                         }
-                                        val updatedUser = user.copy(isChecked = isCheckedState.value)
-                                        database.userDao().updateItem(updatedUser)
+                                        val updatedMyDay =
+                                            dayInfo.copy(isChecked = isCheckedState.value)
+                                        database.MyDayDao().updateItem(updatedMyDay)
                                     }
                                 },
                                 Modifier.padding(10.dp)
                             )
                             Text(
-                                text = user.todo,
-                                color = Color.White
+                                text = dayInfo.todo,
+                                color =if (isCheckedState.value) MaterialTheme.colorScheme.onPrimary else Color.White,
+                                textDecoration = if (isCheckedState.value) TextDecoration.LineThrough else null
                             )
                         }
                     }
