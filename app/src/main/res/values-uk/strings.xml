@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Список справ</string>
+    <string name="my_day">Мій день</string>
+    <string name="tasks">Завдання</string>
+    <string name="new_list">Новий список\n</string>
+    <string name="username">Cтепан Бандура</string>
+    <string name="email">useremail@gmail.com</string>
+    <string name="pick_background">Виберіть тло</string>
+    <string name="change_background">Змінити тло</string>
+    <string name="enter_your_text">Введіть текст</string>
+    <string name="delete">Видалити\n</string>
+    <string name="edit">Редагувати\n</string>
+</resources>

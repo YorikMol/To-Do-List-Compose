@@ -47,9 +47,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -74,33 +72,41 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDay(navController: NavHostController, database: AppDatabase) {
+fun NewListsComposable(navController: NavHostController, database: AppDatabase,screenNameId: Int) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val dateFormat = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
-    val formattedDate = dateFormat.format(calendar.time)
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.complition_sound) }
+
     var containerColor by remember { mutableStateOf(Color(0xFFEE9E8B)) }
 
     val scope = rememberCoroutineScope()
-
+    val screenNameState = remember { mutableStateOf("") }
+    var newListItems by remember {
+        mutableStateOf<List<NewListEntity>>(emptyList())
+    }
+    LaunchedEffect(screenNameId) {
+        val fetchedScreenName = withContext(Dispatchers.IO) {
+            database.ScreenNameDao().getScreenNameById(screenNameId)
+        }
+        screenNameState.value = fetchedScreenName
+        val fetchedNewListItems = database.NewListDAO().getNewListItemsByScreenNameId(screenNameId)
+        fetchedNewListItems.collect { newList ->
+            newListItems = newList
+        }
+    }
     val focusRequester = remember { FocusRequester() }
-
     val sheetStateInput = rememberModalBottomSheetState()
     val sheetStateBackground = rememberModalBottomSheetState()
     var showBottomSheetInput by remember { mutableStateOf(false) }
     var showBottomSheetBackground by remember { mutableStateOf(false) }
 
     var textValue by remember { mutableStateOf("") }
-    val myDayData by database.MyDayDao().getAll().collectAsState(emptyList())
     var selectedBackgroundImage by remember { mutableIntStateOf(R.drawable.background) }
 
     when (selectedBackgroundImage) {
@@ -176,8 +182,8 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     onClick = {
                         if (textValue.isNotBlank()) {
                             scope.launch {
-                                database.MyDayDao()
-                                    .insertAll(MyDayEntity(todo = textValue))
+                                database.NewListDAO()
+                                    .insertAll(NewListEntity(todo = textValue, screenNameId = screenNameId))
                                 textValue = ""
                             }
                         }
@@ -254,7 +260,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     Icons.Default.ArrowBack,
@@ -262,14 +268,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     contentDescription = null
                 )
             }
-            Column {
-                Text(
-                    text = stringResource(id = R.string.my_day),
-                    color = Color(0xFFfefafa),
-                    fontSize = 22.sp
-                )
-                Text(text = formattedDate, color = Color(0xFFfefafa), fontSize = 16.sp)
-            }
+            Text(text = screenNameState.value, color = Color(0xFFfefafa), fontSize = 22.sp)
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { expanded = true }) {
                 Icon(
@@ -307,8 +306,8 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     .fillMaxWidth()
 
             ) {
-                items(myDayData) { dayInfo ->
-                    val isCheckedState = remember { mutableStateOf(dayInfo.isChecked) }
+                items(newListItems) { task ->
+                    val isCheckedState = remember { mutableStateOf(task.isChecked) }
                     val sheetStateEdit = rememberModalBottomSheetState()
                     var showBottomSheetEdit by remember { mutableStateOf(false) }
                     var textValueEdit by remember { mutableStateOf("") }
@@ -363,8 +362,8 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                     onClick = {
                                         if (textValueEdit.isNotBlank()) {
                                             scope.launch {
-                                                val editedDayInfo = dayInfo.copy(todo = textValueEdit)
-                                                database.MyDayDao().updateItem(editedDayInfo)
+                                                val editedTask = task.copy(todo = textValueEdit, screenNameId = screenNameId)
+                                                database.NewListDAO().updateItem(editedTask)
                                                 textValueEdit = ""
                                                 showBottomSheetEdit = false
                                             }
@@ -434,18 +433,16 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         )
                                     }
                                 },
-
                                 onClick = {
                                     scope.launch {
-                                        database.MyDayDao().delete(dayInfo)
+                                        database.NewListDAO().delete(task)
                                     }
                                     expandedEdit = false
                                 })
-
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = dayInfo.isChecked,
+                                checked = task.isChecked,
                                 onCheckedChange = {
                                     scope.launch {
                                         if (!isCheckedState.value) {
@@ -454,15 +451,15 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         } else if (isCheckedState.value) {
                                             isCheckedState.value = false
                                         }
-                                        val updatedMyDay =
-                                            dayInfo.copy(isChecked = isCheckedState.value)
-                                        database.MyDayDao().updateItem(updatedMyDay)
+                                        val updatedTask =
+                                            task.copy(isChecked = isCheckedState.value, screenNameId = screenNameId)
+                                        database.NewListDAO().updateItem(updatedTask)
                                     }
                                 },
                                 Modifier.padding(10.dp)
                             )
                             Text(
-                                text = dayInfo.todo,
+                                text = task.todo,
                                 color =if (isCheckedState.value) MaterialTheme.colorScheme.onPrimary else Color.White,
                                 textDecoration = if (isCheckedState.value) TextDecoration.LineThrough else null
                             )
@@ -486,8 +483,5 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                 )
             }
         }
-    }
-    DisposableEffect(Unit) {
-        onDispose { mediaPlayer.release() }// This block will be executed when the Composable leaves the composition
     }
 }

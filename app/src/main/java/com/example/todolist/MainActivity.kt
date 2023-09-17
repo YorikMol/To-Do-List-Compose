@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -50,52 +53,36 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.work.Configuration
-import androidx.work.Constraints
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import coil.compose.AsyncImage
 import com.example.todolist.ui.theme.ToDoListTheme
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-        val configuration = Configuration.Builder()
-            .build()
-
-        WorkManager.initialize(this, configuration)
-
-        val constraints = Constraints.Builder()
-            .build()
-
-        val dailyWorkRequest = PeriodicWorkRequestBuilder<MigrationWorker>(
-            repeatInterval = 1,
-            repeatIntervalTimeUnit = TimeUnit.DAYS
-        )
-            .setConstraints(constraints)
-            .build()
-
-        WorkManager.getInstance(this).enqueue(dailyWorkRequest)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val db = AppDatabase.getInstance(applicationContext)
         setContent {
             val navController = rememberNavController()
             ToDoListTheme {
-                NavHost(navController,db)
+                NavHost(navController, db)
             }
         }
     }
 }
+
 @Composable
 fun MainScreen(navController: NavHostController, database: AppDatabase) {
     var showDialog by remember { mutableStateOf(false) }
     var listName by remember { mutableStateOf("") }
-    val screenNames by database.ScreenNameDao().getAll().collectAsState(emptyList())
     val scope = rememberCoroutineScope()
+    val screenNames by database.ScreenNameDao().getAll().collectAsState(emptyList())
+    val focusRequester = remember { FocusRequester() }
     if (showDialog) {
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
         Dialog(onDismissRequest = { showDialog = false }) {
             Card(colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)) {
                 Column(Modifier.padding(20.dp)) {
@@ -106,20 +93,23 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent
                         ),
-                        label = {
+                        placeholder = {
                             Text(
                                 text = "Enter list title"
                             )
-                        })
+                        }, modifier = Modifier.focusRequester(focusRequester)
+                    )
                     Row {
                         Spacer(modifier = Modifier.weight(1f))
                         Button(onClick = {
-                            scope.launch {
-                                database.ScreenNameDao().insert(
-                                    ScreenNameEntity(screenName = listName)
-                                )
-                                listName=""
-                                showDialog=false
+                            if (listName.isNotBlank()) {
+                                scope.launch {
+                                    database.ScreenNameDao().insert(
+                                        ScreenNameEntity(screenName = listName)
+                                    )
+                                    listName = ""
+                                    showDialog = false
+                                }
                             }
                         }, colors = ButtonDefaults.buttonColors(Color.Transparent)) {
                             Text(text = "Create list", color = MaterialTheme.colorScheme.secondary)
@@ -197,8 +187,9 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
                 )
             }
         }
-
-        Divider(thickness = 1.dp, color = Color.White)
+        if (screenNames.isNotEmpty()) {
+            Divider(thickness = 1.dp, color = Color.White)
+        }
 
         LazyColumn(
             Modifier
@@ -210,7 +201,9 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
-                        .clickable{},
+                        .clickable {
+                            navController.navigate("newlist/${screenName.id}")
+                        },
                     shape = RoundedCornerShape(0),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background)
                 ) {

@@ -3,6 +3,7 @@ package com.example.todolist
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -234,7 +235,6 @@ fun Tasks(navController: NavHostController, database: AppDatabase) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(selectedBackgroundImage)
-            .crossfade(true)
             .build(),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
@@ -298,7 +298,7 @@ fun Tasks(navController: NavHostController, database: AppDatabase) {
                     val isCheckedState = remember { mutableStateOf(task.isChecked) }
                     val sheetStateEdit = rememberModalBottomSheetState()
                     var showBottomSheetEdit by remember { mutableStateOf(false) }
-                    var textValueEdit by remember { mutableStateOf(task.todo) }
+                    var textValueEdit by remember { mutableStateOf("") }
                     var expandedEdit by remember { mutableStateOf(false) }
                     if (showBottomSheetEdit) {
                         LaunchedEffect(Unit) {
@@ -391,16 +391,17 @@ fun Tasks(navController: NavHostController, database: AppDatabase) {
                             onDismissRequest = { expandedEdit = false }) {
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        text = stringResource(id = R.string.edit),
-                                        color = MaterialTheme.colorScheme.secondary
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.baseline_edit_24),
-                                        contentDescription = null
-                                    )
+                                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(top = 12.dp)) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.baseline_edit_24),
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            text = stringResource(id = R.string.edit),
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            modifier = Modifier.padding(start=8.dp)
+                                        )
+                                    }
                                 },
                                 onClick = {
                                     showBottomSheetEdit = true
@@ -408,16 +409,17 @@ fun Tasks(navController: NavHostController, database: AppDatabase) {
                                 })
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        text = stringResource(id = R.string.delete),
-                                        color = MaterialTheme.colorScheme.secondary
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.baseline_delete_24),
-                                        contentDescription = null
-                                    )
+                                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(top = 12.dp)) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.baseline_delete_24),
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            text = stringResource(id = R.string.delete),
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            modifier = Modifier.padding(start=8.dp)
+                                        )
+                                    }
                                 },
                                 onClick = {
                                     scope.launch {
