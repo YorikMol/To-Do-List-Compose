@@ -1,4 +1,8 @@
-# My To Do List App with Jetpack Compose
+<p align="center">
+  <img src="GitHubContent/ic_launcher_round.png" width="200" />
+</p>
+
+# To Do List App with Jetpack Compose
 
 Hey there! 👋 Welcome to my personal project – a To-Do List app designed with simplicity and productivity in mind. I built this app using Jetpack Compose for Android. Below, I've highlighted the key features and technologies that went into creating this app.
 
