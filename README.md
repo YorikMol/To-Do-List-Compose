@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="GitHubContent/ic_launcher_round.png" width="200" />
+  <img src="GitHubContent/ic_launcher_round.jpg" width="200" />
 </p>
 
 # To Do List App with Jetpack Compose
@@ -35,31 +35,31 @@ Hey there! 👋 Welcome to my personal project – a To-Do List app designed wit
 ## Light Theme Screenshots
 
 <p align="center">
-  <img src="GitHubContent/1_dark.png" width="200" />
-  <img src="GitHubContent/2_dark.png" width="200" />
-  <img src="GitHubContent/3_dark.png" width="200" />
-  <img src="GitHubContent/4_dark.png" width="200" />
+  <img src="GitHubContent/light_1.jpg" width="200" />
+  <img src="GitHubContent/light_2.jpg" width="200" />
+  <img src="GitHubContent/light_3.jpg" width="200" />
+  <img src="GitHubContent/light_4.jpg" width="200" />
 </p>
 <p align="center">
-  <img src="GitHubContent/5_dark.png" width="200" />
-  <img src="GitHubContent/6_dark.png" width="200" />
-  <img src="GitHubContent/7_dark.png" width="200" />
-  <img src="GitHubContent/8_dark.png" width="200" />
+  <img src="GitHubContent/light_5.jpg" width="200" />
+  <img src="GitHubContent/light_6.jpg" width="200" />
+  <img src="GitHubContent/light_7.jpg" width="200" />
+  <img src="GitHubContent/light_8.jpg" width="200" />
 </p>
 
 ## Dark Theme Screenshots
 
 <p align="center">
-  <img src="GitHubContent/1_dark.png" width="200" />
-  <img src="GitHubContent/2_dark.png" width="200" />
-  <img src="GitHubContent/3_dark.png" width="200" />
-  <img src="GitHubContent/4_dark.png" width="200" />
+  <img src="GitHubContent/dark_1.jpg" width="200" />
+  <img src="GitHubContent/dark_2.jpg" width="200" />
+  <img src="GitHubContent/dark_3.jpg" width="200" />
+  <img src="GitHubContent/dark_4.jpg" width="200" />
 </p>
 <p align="center">
-  <img src="GitHubContent/5_dark.png" width="200" />
-  <img src="GitHubContent/6_dark.png" width="200" />
-  <img src="GitHubContent/7_dark.png" width="200" />
-  <img src="GitHubContent/8_dark.png" width="200" />
+  <img src="GitHubContent/dark_5.jpg" width="200" />
+  <img src="GitHubContent/dark_6.jpg" width="200" />
+  <img src="GitHubContent/dark_7.jpg" width="200" />
+  <img src="GitHubContent/dark_8.jpg" width="200" />
 </p>
 
 
