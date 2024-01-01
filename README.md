@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="GitHubContent/ic_launcher_round.jpg" width="200" />
+  <img src="GitHubContent/ic_launcher_round.png" width="200" />
 </p>
 
 # To Do List App with Jetpack Compose
