@@ -1,15 +1,16 @@
-package com.example.todolist
+package com.example.todolist.RoomDatabase
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-@Database(entities = [MyDayEntity::class,TaskEntity::class,NewListEntity::class,ScreenNameEntity::class], version = 1)
+
+@Database(entities = [MyDayEntity::class, TaskEntity::class, NewListEntity::class, ScreenNameEntity::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun MyDayDao(): MyDayDao
     abstract fun taskDao(): TaskDao
     abstract fun NewListDAO(): NewListDAO
-    abstract fun ScreenNameDao():ScreenNameDao
+    abstract fun ScreenNameDao(): ScreenNameDao
     companion object {
         @Volatile
         private var instance: AppDatabase? = null

@@ -54,6 +54,8 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.example.todolist.RoomDatabase.AppDatabase
+import com.example.todolist.RoomDatabase.ScreenNameEntity
 import com.example.todolist.ui.theme.ToDoListTheme
 import kotlinx.coroutines.launch
 
@@ -86,12 +88,14 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
         Dialog(onDismissRequest = { showDialog = false }) {
             Card(colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)) {
                 Column(Modifier.padding(20.dp)) {
-                    Text(text = "New list")
+                    Text(text = "New list",color=MaterialTheme.colorScheme.secondary)
                     TextField(value = listName,
                         onValueChange = { newValue -> listName = newValue },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor =MaterialTheme.colorScheme.secondary,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary
                         ),
                         placeholder = {
                             Text(
@@ -188,7 +192,7 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
             }
         }
         if (screenNames.isNotEmpty()) {
-            Divider(thickness = 1.dp, color = Color.White)
+            Divider(thickness = 1.5.dp, color = MaterialTheme.colorScheme.secondary)
         }
 
         LazyColumn(

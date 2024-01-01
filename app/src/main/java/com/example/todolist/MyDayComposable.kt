@@ -3,6 +3,7 @@ package com.example.todolist
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,6 +76,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.todolist.RoomDatabase.AppDatabase
+import com.example.todolist.RoomDatabase.MyDayEntity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -140,7 +144,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
             windowInsets = WindowInsets(bottom = 0.dp),
             sheetState = sheetStateInput,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
+            dragHandle = { BottomSheetDefaults.DragHandle(color = if (isSystemInDarkTheme()) Color.White else Color.Black) }
         ) {
             Row(
                 modifier = Modifier
@@ -185,7 +189,9 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                     modifier = Modifier
                         .size(48.dp),
                     contentPadding = PaddingValues(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF777779)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(0xFFE2E2E2)
+                    ),
                     shape = RoundedCornerShape(8.dp)
 
                 ) {
@@ -205,7 +211,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
             windowInsets = WindowInsets(bottom = 0.dp),
             sheetState = sheetStateBackground,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
+            dragHandle = { BottomSheetDefaults.DragHandle(color = if (isSystemInDarkTheme()) Color.White else Color.Black) }
         ) {
             Column(modifier = Modifier.navigationBarsPadding()) {
                 Text(
@@ -322,7 +328,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                             windowInsets = WindowInsets(bottom = 0.dp),
                             sheetState = sheetStateEdit,
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFF777779)) }
+                            dragHandle = { BottomSheetDefaults.DragHandle(color = if (isSystemInDarkTheme()) Color.White else Color.Black) }
                         ) {
                             Row(
                                 modifier = Modifier
@@ -363,7 +369,8 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                     onClick = {
                                         if (textValueEdit.isNotBlank()) {
                                             scope.launch {
-                                                val editedDayInfo = dayInfo.copy(todo = textValueEdit)
+                                                val editedDayInfo =
+                                                    dayInfo.copy(todo = textValueEdit)
                                                 database.MyDayDao().updateItem(editedDayInfo)
                                                 textValueEdit = ""
                                                 showBottomSheetEdit = false
@@ -374,9 +381,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         .size(48.dp),
                                     contentPadding = PaddingValues(0.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(
-                                            0xFF777779
-                                        )
+                                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(0xFFE2E2E2)
                                     ),
                                     shape = RoundedCornerShape(8.dp)
 
@@ -396,7 +401,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                             .fillMaxWidth()
                             .padding(top = 3.dp)
                             .clickable { expandedEdit = true },
-                        colors = CardDefaults.cardColors(Color(0xFF212121))
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         DropdownMenu(
                             modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
@@ -404,7 +409,10 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                             onDismissRequest = { expandedEdit = false }) {
                             DropdownMenuItem(
                                 text = {
-                                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(top = 12.dp)) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        modifier = Modifier.padding(top = 12.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.baseline_edit_24),
                                             contentDescription = null
@@ -412,7 +420,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         Text(
                                             text = stringResource(id = R.string.edit),
                                             color = MaterialTheme.colorScheme.secondary,
-                                            modifier = Modifier.padding(start=8.dp)
+                                            modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
@@ -422,7 +430,10 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                 })
                             DropdownMenuItem(
                                 text = {
-                                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(top = 12.dp)) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        modifier = Modifier.padding(top = 12.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.baseline_delete_24),
                                             contentDescription = null
@@ -430,7 +441,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         Text(
                                             text = stringResource(id = R.string.delete),
                                             color = MaterialTheme.colorScheme.secondary,
-                                            modifier = Modifier.padding(start=8.dp)
+                                            modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
@@ -446,6 +457,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
                                 checked = dayInfo.isChecked,
+                                colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.primaryContainer, checkedColor = MaterialTheme.colorScheme.onPrimary),
                                 onCheckedChange = {
                                     scope.launch {
                                         if (!isCheckedState.value) {
@@ -459,11 +471,11 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         database.MyDayDao().updateItem(updatedMyDay)
                                     }
                                 },
-                                Modifier.padding(10.dp)
+                                modifier = Modifier.padding(10.dp)
                             )
                             Text(
                                 text = dayInfo.todo,
-                                color =if (isCheckedState.value) MaterialTheme.colorScheme.onPrimary else Color.White,
+                                color = if (isCheckedState.value) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
                                 textDecoration = if (isCheckedState.value) TextDecoration.LineThrough else null
                             )
                         }

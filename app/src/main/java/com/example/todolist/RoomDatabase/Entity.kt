@@ -1,4 +1,4 @@
-package com.example.todolist
+package com.example.todolist.RoomDatabase
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
