@@ -30,7 +30,7 @@ Hey there! 👋 Welcome to my personal project – a To-Do List app designed wit
 - **Splash Screen:** Enhancing user engagement with a visually appealing splash screen during app initialization.
 - **Coroutines:** Implementing lightweight and efficient concurrency for seamless task execution.
 - **Material Design:** Adhering to the principles of Material Design for a consistent and aesthetically pleasing user interface.
-- **Glide:** Streamlining the loading and caching of images for a smoother and more responsive app experience.
+- **Coil:** Streamlining the loading and caching of images, providing efficient image management for an enhanced app experience.
 
 ## Light Theme Screenshots
 
