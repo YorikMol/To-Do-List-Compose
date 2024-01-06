@@ -15,6 +15,7 @@ Hey there! 👋 Welcome to my personal project – a To-Do List app designed wit
 - **Effortless Task Completion:** Quickly mark tasks as complete with a simple tap, adding a satisfying touch to your productivity.
 - **Local Storage with Room Database:** Your data is securely stored locally using Room Database, ensuring efficient and reliable task management without the need for constant internet connectivity.
 - **Adaptive Dark Mode:** Seamlessly switch between light and dark modes based on your Android phone's theme, providing a comfortable and visually pleasing experience.
+- **Splash Screen:** Enhancing user engagement with a visually appealing splash screen during app initialization.
 - **Multilingual Support:** Choose from three supported languages - English, Russian, and Ukrainian - ensuring a personalized experience for users around the world.
 - **Smooth Screen Transitions:** Experience a visually pleasing journey with seamless animations when switching between screens, enhancing the overall user interface and providing an engaging and polished feel.
 - **Sync with Google Drive (Planned):** Soon, enjoy the convenience of syncing your app data with Google Drive, ensuring that your tasks are seamlessly accessible across multiple devices.
