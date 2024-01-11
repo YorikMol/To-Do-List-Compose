@@ -15,6 +15,7 @@ Hey there! 👋 Welcome to my personal project – a To-Do List app designed wit
 - **Effortless Task Completion:** Quickly mark tasks as complete with a simple tap, adding a satisfying touch to your productivity.
 - **Local Storage with Room Database:** Your data is securely stored locally using Room Database, ensuring efficient and reliable task management without the need for constant internet connectivity.
 - **Adaptive Dark Mode:** Seamlessly switch between light and dark modes based on your Android phone's theme, providing a comfortable and visually pleasing experience.
+- **Splash Screen:** Enhancing user engagement with a visually appealing splash screen during app initialization.
 - **Multilingual Support:** Choose from three supported languages - English, Russian, and Ukrainian - ensuring a personalized experience for users around the world.
 - **Smooth Screen Transitions:** Experience a visually pleasing journey with seamless animations when switching between screens, enhancing the overall user interface and providing an engaging and polished feel.
 - **Sync with Google Drive (Planned):** Soon, enjoy the convenience of syncing your app data with Google Drive, ensuring that your tasks are seamlessly accessible across multiple devices.
@@ -30,36 +31,36 @@ Hey there! 👋 Welcome to my personal project – a To-Do List app designed wit
 - **Splash Screen:** Enhancing user engagement with a visually appealing splash screen during app initialization.
 - **Coroutines:** Implementing lightweight and efficient concurrency for seamless task execution.
 - **Material Design:** Adhering to the principles of Material Design for a consistent and aesthetically pleasing user interface.
-- **Glide:** Streamlining the loading and caching of images for a smoother and more responsive app experience.
+- **Coil:** Streamlining the loading and caching of images, providing efficient image management for an enhanced app experience.
 
 ## Light Theme Screenshots
 
 <p align="center">
-  <img src="GitHubContent/1_dark.png" width="200" />
-  <img src="GitHubContent/2_dark.png" width="200" />
-  <img src="GitHubContent/3_dark.png" width="200" />
-  <img src="GitHubContent/4_dark.png" width="200" />
+  <img src="GitHubContent/light_1.jpg" width="200" />
+  <img src="GitHubContent/light_2.jpg" width="200" />
+  <img src="GitHubContent/light_3.jpg" width="200" />
+  <img src="GitHubContent/light_4.jpg" width="200" />
 </p>
 <p align="center">
-  <img src="GitHubContent/5_dark.png" width="200" />
-  <img src="GitHubContent/6_dark.png" width="200" />
-  <img src="GitHubContent/7_dark.png" width="200" />
-  <img src="GitHubContent/8_dark.png" width="200" />
+  <img src="GitHubContent/light_5.jpg" width="200" />
+  <img src="GitHubContent/light_6.jpg" width="200" />
+  <img src="GitHubContent/light_7.jpg" width="200" />
+  <img src="GitHubContent/light_8.jpg" width="200" />
 </p>
 
 ## Dark Theme Screenshots
 
 <p align="center">
-  <img src="GitHubContent/1_dark.png" width="200" />
-  <img src="GitHubContent/2_dark.png" width="200" />
-  <img src="GitHubContent/3_dark.png" width="200" />
-  <img src="GitHubContent/4_dark.png" width="200" />
+  <img src="GitHubContent/dark_1.jpg" width="200" />
+  <img src="GitHubContent/dark_2.jpg" width="200" />
+  <img src="GitHubContent/dark_3.jpg" width="200" />
+  <img src="GitHubContent/dark_4.jpg" width="200" />
 </p>
 <p align="center">
-  <img src="GitHubContent/5_dark.png" width="200" />
-  <img src="GitHubContent/6_dark.png" width="200" />
-  <img src="GitHubContent/7_dark.png" width="200" />
-  <img src="GitHubContent/8_dark.png" width="200" />
+  <img src="GitHubContent/dark_5.jpg" width="200" />
+  <img src="GitHubContent/dark_6.jpg" width="200" />
+  <img src="GitHubContent/dark_7.jpg" width="200" />
+  <img src="GitHubContent/dark_8.jpg" width="200" />
 </p>
 
 
