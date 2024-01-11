@@ -1,8 +1,11 @@
 package com.example.todolist
 
 import android.media.MediaPlayer
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,38 +74,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.todolist.RoomDatabase.AppDatabase
 import com.example.todolist.RoomDatabase.NewListEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NewListsComposable(navController: NavHostController, database: AppDatabase, screenNameId: Int) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.complition_sound) }
-
     var containerColor by remember { mutableStateOf(Color(0xFFEE9E8B)) }
 
     val scope = rememberCoroutineScope()
     val screenNameState = remember { mutableStateOf("") }
+    val BACKGROUND_KEY = intPreferencesKey("background_$screenNameId")
+    Log.d("MYDATA","$BACKGROUND_KEY")
     var newListItems by remember {
         mutableStateOf<List<NewListEntity>>(emptyList())
-    }
-    LaunchedEffect(screenNameId) {
-        val fetchedScreenName = withContext(Dispatchers.IO) {
-            database.ScreenNameDao().getScreenNameById(screenNameId)
-        }
-        screenNameState.value = fetchedScreenName
-        val fetchedNewListItems = database.NewListDAO().getNewListItemsByScreenNameId(screenNameId)
-        fetchedNewListItems.collect { newList ->
-            newListItems = newList
-        }
     }
     val focusRequester = remember { FocusRequester() }
     val sheetStateInput = rememberModalBottomSheetState()
@@ -112,7 +109,6 @@ fun NewListsComposable(navController: NavHostController, database: AppDatabase, 
 
     var textValue by remember { mutableStateOf("") }
     var selectedBackgroundImage by remember { mutableIntStateOf(R.drawable.background) }
-
     when (selectedBackgroundImage) {
         R.drawable.background -> {
             containerColor = Color(0xFFEE9E8B)
@@ -123,24 +119,58 @@ fun NewListsComposable(navController: NavHostController, database: AppDatabase, 
         }
 
         R.drawable.background2 -> {
+            containerColor = Color(0xFFd16a30)
+        }
+
+        R.drawable.background3 -> {
             containerColor = Color(0xFFAE9994)
         }
 
         R.drawable.background4 -> {
-            containerColor = Color(0xFFc15d5f)
+            containerColor = Color(0xFFa57157)
         }
 
         R.drawable.background5 -> {
             containerColor = Color(0xFFd4e8f3)
+        }
+        R.drawable.background6 -> {
+            containerColor = Color(0xFF798193)
+        }
+        R.drawable.background7 -> {
+            containerColor = Color(0xFF06b7b2)
+        }
+        R.drawable.background8 -> {
+            containerColor = Color(0xFFb07a2d)
         }
     }
     val images = listOf(
         R.drawable.background,
         R.drawable.background1,
         R.drawable.background2,
+        R.drawable.background3,
         R.drawable.background4,
-        R.drawable.background5
+        R.drawable.background5,
+        R.drawable.background6,
+        R.drawable.background7,
+        R.drawable.background8
     )
+    LaunchedEffect(screenNameId) {
+        val fetchedScreenName = withContext(Dispatchers.IO) {
+            database.ScreenNameDao().getScreenNameById(screenNameId)
+        }
+        screenNameState.value = fetchedScreenName
+        val fetchedNewListItems = database.NewListDAO().getNewListItemsByScreenNameId(screenNameId)
+        fetchedNewListItems.collect { newList ->
+            newListItems = newList
+        }
+    }
+    LaunchedEffect(context.dataStore) {
+        context.dataStore.data.map { preferences ->
+            preferences[BACKGROUND_KEY] ?: R.drawable.background
+        }.collect { newValue ->
+            selectedBackgroundImage = newValue
+        }
+    }
     if (showBottomSheetInput) {
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
@@ -236,7 +266,11 @@ fun NewListsComposable(navController: NavHostController, database: AppDatabase, 
                                 .height(120.dp)
                                 .width(80.dp)
                                 .clickable {
-                                    selectedBackgroundImage = drawableId
+                                    scope.launch {
+                                        context.dataStore.edit { preferences ->
+                                            preferences[BACKGROUND_KEY] = drawableId
+                                        }
+                                    }
                                 }
                                 .clip(RoundedCornerShape(10.dp))
 
@@ -396,7 +430,10 @@ fun NewListsComposable(navController: NavHostController, database: AppDatabase, 
                         Modifier
                             .fillMaxWidth()
                             .padding(top = 3.dp)
-                            .clickable { expandedEdit = true },
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {expandedEdit = true}
+                            ),
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         DropdownMenu(

@@ -49,7 +49,9 @@ interface ScreenNameDao {
     fun getScreenNameWithNewLists(screenNameId: Int): List<ScreenNameWithNewLists>
     @Query("SELECT screenName FROM ScreenNameEntity WHERE id = :screenNameId")
     suspend fun getScreenNameById(screenNameId: Int): String
-
+    @Transaction
+    @Query("DELETE FROM ScreenNameEntity WHERE screenName = :screenName")
+    suspend fun deleteScreenNameAndAssociatedNewList(screenName: String)
 
 }
 @Dao

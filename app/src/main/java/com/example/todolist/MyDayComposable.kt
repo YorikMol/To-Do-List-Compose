@@ -1,8 +1,11 @@
 package com.example.todolist
 
+import android.content.Context
 import android.media.MediaPlayer
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,19 +76,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.todolist.RoomDatabase.AppDatabase
 import com.example.todolist.RoomDatabase.MyDayEntity
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MyDay(navController: NavHostController, database: AppDatabase) {
+    val BACKGROUND_KEY = intPreferencesKey("background_my_day")
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -106,7 +118,13 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
     var textValue by remember { mutableStateOf("") }
     val myDayData by database.MyDayDao().getAll().collectAsState(emptyList())
     var selectedBackgroundImage by remember { mutableIntStateOf(R.drawable.background) }
-
+    LaunchedEffect(context.dataStore) {
+        context.dataStore.data.map { preferences ->
+            preferences[BACKGROUND_KEY] ?: R.drawable.background
+        }.collect { newValue ->
+            selectedBackgroundImage = newValue
+        }
+    }
     when (selectedBackgroundImage) {
         R.drawable.background -> {
             containerColor = Color(0xFFEE9E8B)
@@ -117,23 +135,43 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
         }
 
         R.drawable.background2 -> {
+            containerColor = Color(0xFFd16a30)
+        }
+
+        R.drawable.background3 -> {
             containerColor = Color(0xFFAE9994)
         }
 
         R.drawable.background4 -> {
-            containerColor = Color(0xFFc15d5f)
+            containerColor = Color(0xFFa57157)
         }
 
         R.drawable.background5 -> {
             containerColor = Color(0xFFd4e8f3)
+        }
+
+        R.drawable.background6 -> {
+            containerColor = Color(0xFF798193)
+        }
+
+        R.drawable.background7 -> {
+            containerColor = Color(0xFF06b7b2)
+        }
+
+        R.drawable.background8 -> {
+            containerColor = Color(0xFFb07a2d)
         }
     }
     val images = listOf(
         R.drawable.background,
         R.drawable.background1,
         R.drawable.background2,
+        R.drawable.background3,
         R.drawable.background4,
-        R.drawable.background5
+        R.drawable.background5,
+        R.drawable.background6,
+        R.drawable.background7,
+        R.drawable.background8
     )
     if (showBottomSheetInput) {
         LaunchedEffect(Unit) {
@@ -190,7 +228,9 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                         .size(48.dp),
                     contentPadding = PaddingValues(0.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(0xFFE2E2E2)
+                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(
+                            0xFFE2E2E2
+                        )
                     ),
                     shape = RoundedCornerShape(8.dp)
 
@@ -232,13 +272,15 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                 .height(120.dp)
                                 .width(80.dp)
                                 .clickable {
-                                    selectedBackgroundImage = drawableId
+                                    scope.launch {
+                                        context.dataStore.edit { preferences ->
+                                            preferences[BACKGROUND_KEY] = drawableId
+                                        }
+                                    }
                                 }
                                 .clip(RoundedCornerShape(10.dp))
 
                         )
-
-
                     }
                 }
             }
@@ -251,8 +293,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
-
-        )
+    )
 
     Column(
         modifier = Modifier
@@ -272,7 +313,7 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                 Text(
                     text = stringResource(id = R.string.my_day),
                     color = Color(0xFFfefafa),
-                    fontSize = 22.sp
+                    fontSize = 22.sp,
                 )
                 Text(text = formattedDate, color = Color(0xFFfefafa), fontSize = 16.sp)
             }
@@ -381,7 +422,9 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                                         .size(48.dp),
                                     contentPadding = PaddingValues(0.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(0xFFE2E2E2)
+                                        containerColor = if (isSystemInDarkTheme()) Color(0xFF777779) else Color(
+                                            0xFFE2E2E2
+                                        )
                                     ),
                                     shape = RoundedCornerShape(8.dp)
 
@@ -400,7 +443,10 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                         Modifier
                             .fillMaxWidth()
                             .padding(top = 3.dp)
-                            .clickable { expandedEdit = true },
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = { expandedEdit = true }
+                            ),
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         DropdownMenu(
@@ -457,7 +503,10 @@ fun MyDay(navController: NavHostController, database: AppDatabase) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
                                 checked = dayInfo.isChecked,
-                                colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.primaryContainer, checkedColor = MaterialTheme.colorScheme.onPrimary),
+                                colors = CheckboxDefaults.colors(
+                                    checkmarkColor = MaterialTheme.colorScheme.primaryContainer,
+                                    checkedColor = MaterialTheme.colorScheme.onPrimary
+                                ),
                                 onCheckedChange = {
                                     scope.launch {
                                         if (!isCheckedState.value) {

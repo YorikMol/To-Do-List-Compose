@@ -3,8 +3,11 @@ package com.example.todolist
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +28,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,6 +79,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(navController: NavHostController, database: AppDatabase) {
     var showDialog by remember { mutableStateOf(false) }
@@ -201,16 +207,47 @@ fun MainScreen(navController: NavHostController, database: AppDatabase) {
                 .fillMaxWidth()
         ) {
             items(screenNames) { screenName ->
+                var expandedEdit by remember { mutableStateOf(false) }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable {
-                            navController.navigate("newlist/${screenName.id}")
-                        },
+                        .padding(top = 15.dp, bottom = 15.dp, start = 8.dp)
+                        .combinedClickable(
+                            onClick = { navController.navigate("newlist/${screenName.id}") },
+                            onLongClick = {expandedEdit = true},
+                        ),
                     shape = RoundedCornerShape(0),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background)
                 ) {
+                    DropdownMenu(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
+                        expanded = expandedEdit,
+                        onDismissRequest = { expandedEdit = false }) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.padding(top = 12.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_delete_24),
+                                        contentDescription = null
+                                    )
+                                    Text(
+                                        text = stringResource(id = R.string.delete),
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+                            },
+
+                            onClick = {
+                                scope.launch {
+                                    database.ScreenNameDao().deleteScreenNameAndAssociatedNewList(screenName.screenName)
+                                }
+                                expandedEdit = false
+                            })
+                    }
                     Row {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_format_list_bulleted_24),

@@ -18,7 +18,16 @@ data class TaskEntity(
     var todo: String,
     var isChecked:Boolean=false,
 )
-@Entity(foreignKeys = [ForeignKey(entity = ScreenNameEntity::class, parentColumns = ["id"], childColumns = ["screenNameId"])])
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = ScreenNameEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["screenNameId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class NewListEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
@@ -26,6 +35,7 @@ data class NewListEntity(
     var isChecked: Boolean = false,
     val screenNameId: Int
 )
+
 @Entity
 data class ScreenNameEntity(
     @PrimaryKey(autoGenerate = true)
